@@ -37,14 +37,25 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
         
-    - name: Build Saleor API image
+    - name: Build and push Saleor API image
       uses: docker/build-push-action@v5
       with:
         context: ./saleor-webapp
-        load: true
-        tags: ${{ env.SALEOR_IMAGE }}:${{ github.sha }}
+        push: true
+        tags: |
+          ${{ env.SALEOR_IMAGE }}:latest
+          ${{ env.SALEOR_IMAGE }}:${{ github.sha }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
+
+  scan:
+    needs: build
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Pull Saleor API image
+      run: |
+        docker pull ${{ env.SALEOR_IMAGE }}:${{ github.sha }}
         
     - name: Run Trivy vulnerability scanner
       uses: aquasecurity/trivy-action@master
@@ -58,20 +69,9 @@ jobs:
       if: always()
       with:
         sarif_file: 'trivy-results.sarif'
-        
-    - name: Push Saleor API image
-      uses: docker/build-push-action@v5
-      with:
-        context: ./saleor-webapp
-        push: true
-        tags: |
-          ${{ env.SALEOR_IMAGE }}:latest
-          ${{ env.SALEOR_IMAGE }}:${{ github.sha }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
 
   deploy:
-    needs: build
+    needs: [build, scan]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     
