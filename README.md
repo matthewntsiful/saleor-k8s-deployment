@@ -91,6 +91,10 @@ saleor-k8s-deployment/
 │   ├── 08-ingress.yaml         # API external access
 │   ├── 09-dashboard-deployment.yaml # Admin dashboard
 │   └── 10-dashboard-ingress.yaml   # Dashboard external access
+├── screenshots/                # Application screenshots
+│   ├── application.png         # Complete platform overview
+│   ├── dashboard.png           # Admin dashboard interface
+│   └── graphql-playground.png  # GraphQL API playground
 ├── scripts/
 │   └── deploy.sh               # Automated deployment script
 └── docs/
@@ -137,6 +141,20 @@ Add these entries to your `/etc/hosts` file:
 ### 3. Access the Platform
 - **API & GraphQL Playground**: http://saleor.local
 - **Admin Dashboard**: http://dashboard.saleor.local
+
+## 📸 Screenshots
+
+### Saleor API & GraphQL Playground
+![Saleor GraphQL Playground](screenshots/graphql-playground.png)
+*GraphQL Playground interface for API testing and exploration*
+
+### Admin Dashboard
+![Saleor Dashboard](screenshots/dashboard.png)
+*React-based admin interface for managing the e-commerce platform*
+
+### Application Overview
+![Saleor Application](screenshots/application.png)
+*Complete Saleor e-commerce platform running on Kubernetes*
 
 ## 🔧 Configuration
 
