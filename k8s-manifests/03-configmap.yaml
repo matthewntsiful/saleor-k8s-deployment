@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: saleor-config
+  namespace: saleor
+data:
+  CELERY_BROKER_URL: "redis://redis:6379/1"
+  DEFAULT_FROM_EMAIL: "noreply@example.com"
+  EMAIL_URL: "smtp://localhost:1025"
+  HTTP_IP_FILTER_ALLOW_LOOPBACK_IPS: "True"
+  DASHBOARD_URL: "http://dashboard.saleor.local/"
+  ALLOWED_HOSTS: "saleor.local,localhost,127.0.0.1"

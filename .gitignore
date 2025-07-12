@@ -1,0 +1,26 @@
+# Kubernetes
+*.log
+*.tmp
+
+# Secrets (never commit real secrets)
+*secret*.yaml.bak
+*.env
+.env*
+
+# Backup files
+*.sql
+*backup*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+temp/
+tmp/
