@@ -80,6 +80,15 @@ This project deploys a complete e-commerce platform consisting of:
 ```
 saleor-k8s-deployment/
 ├── README.md                    # This file
+├── .github/workflows/          # CI/CD Pipeline
+│   └── ci-cd.yml               # GitHub Actions workflow
+├── saleor-webapp/              # Saleor application source code
+│   ├── saleor/                 # Django application
+│   ├── templates/              # HTML templates
+│   ├── Dockerfile              # API container build
+│   ├── manage.py               # Django management
+│   ├── pyproject.toml          # Python dependencies
+│   └── ...                     # Other source files
 ├── k8s-manifests/              # Kubernetes YAML files
 │   ├── 01-namespace.yaml       # Namespace isolation
 │   ├── 02-secret.yaml          # Sensitive configuration
@@ -141,6 +150,44 @@ Add these entries to your `/etc/hosts` file:
 ### 3. Access the Platform
 - **API & GraphQL Playground**: http://saleor.local
 - **Admin Dashboard**: http://dashboard.saleor.local
+
+## 🚀 CI/CD Pipeline
+
+Automated GitHub Actions workflow for building and deploying Saleor:
+
+### Pipeline Features
+- **Build**: Builds Docker images from source code in `saleor-webapp/`
+- **Security Scan**: Trivy vulnerability scanning with SARIF upload
+- **Push**: Pushes images to GitHub Container Registry (GHCR)
+- **Deploy**: Automatic deployment to Kubernetes on main branch
+- **Verification**: Health checks and rollout status validation
+- **Manual Trigger**: Supports workflow_dispatch for manual deployments
+
+### Required Secrets
+Configure these secrets in your GitHub repository:
+
+```bash
+KUBE_CONFIG        # Base64 encoded kubeconfig file
+```
+
+### Required Variables
+Configure these variables in your GitHub repository:
+
+```bash
+KUBERNETES_NAMESPACE # Kubernetes namespace
+```
+
+### Automatic Configuration
+- **GITHUB_TOKEN**: Automatically provided by GitHub Actions
+- **Images**: Automatically tagged as `ghcr.io/username/saleor-webapp`
+
+### Setup Instructions
+```bash
+# Encode kubeconfig for GitHub secret
+cat ~/.kube/config | base64 -w 0
+
+# Add to GitHub repository secrets as KUBE_CONFIG
+```
 
 ## 📸 Screenshots
 

@@ -1,0 +1,100 @@
+name: Saleor K8s Deployment CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  SALEOR_IMAGE: ghcr.io/${{ github.repository_owner }}/saleor-webapp
+  DASHBOARD_IMAGE: ghcr.io/${{ github.repository_owner }}/saleor-dashboard
+  KUBERNETES_NAMESPACE: ${{ vars.KUBERNETES_NAMESPACE }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+      
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Build Saleor API image
+      uses: docker/build-push-action@v5
+      with:
+        context: ./saleor-webapp
+        load: true
+        tags: ${{ env.SALEOR_IMAGE }}:${{ github.sha }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: ${{ env.SALEOR_IMAGE }}:${{ github.sha }}
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+        
+    - name: Upload Trivy scan results
+      uses: github/codeql-action/upload-sarif@v3
+      if: always()
+      with:
+        sarif_file: 'trivy-results.sarif'
+        
+    - name: Push Saleor API image
+      uses: docker/build-push-action@v5
+      with:
+        context: ./saleor-webapp
+        push: true
+        tags: |
+          ${{ env.SALEOR_IMAGE }}:latest
+          ${{ env.SALEOR_IMAGE }}:${{ github.sha }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Configure kubectl
+      uses: azure/setup-kubectl@v3
+      with:
+        version: 'latest'
+        
+    - name: Set up Kubernetes config
+      run: |
+        mkdir -p ~/.kube
+        echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > ~/.kube/config
+        
+    - name: Update image tags in manifests
+      run: |
+        sed -i "s|${{ env.SALEOR_IMAGE }}:latest|${{ env.SALEOR_IMAGE }}:${{ github.sha }}|g" k8s-manifests/07-saleor-deployment.yaml
+        
+    - name: Deploy to Kubernetes
+      run: |
+        kubectl apply -f k8s-manifests/
+        kubectl rollout status deployment/saleor -n ${{ env.KUBERNETES_NAMESPACE }} --timeout=300s
+        kubectl rollout status deployment/saleor-dashboard -n ${{ env.KUBERNETES_NAMESPACE }} --timeout=300s
+        
+    - name: Verify deployment
+      run: |
+        kubectl get pods -n ${{ env.KUBERNETES_NAMESPACE }}
+        kubectl get services -n ${{ env.KUBERNETES_NAMESPACE }}
+        kubectl get ingress -n ${{ env.KUBERNETES_NAMESPACE }}
