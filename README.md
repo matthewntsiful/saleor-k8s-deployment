@@ -1,6 +1,35 @@
 # Saleor E-commerce Platform on Kubernetes
 
+[![Docker Hub](https://img.shields.io/badge/Docker%20Hub-matthewntsiful-blue?logo=docker)](https://hub.docker.com/u/matthewntsiful)
+[![Kubernetes](https://img.shields.io/badge/Kubernetes-Ready-green?logo=kubernetes)](https://kubernetes.io/)
+[![Saleor](https://img.shields.io/badge/Saleor-E--commerce-purple?logo=saleor)](https://saleor.io/)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Build Status](https://img.shields.io/badge/Build-Passing-brightgreen)]()
+
 A production-ready deployment of [Saleor](https://saleor.io/) - a headless, GraphQL-native e-commerce platform - on Kubernetes with complete infrastructure setup.
+
+## 📦 Custom Docker Images
+
+This deployment uses custom-built Docker images based on the original Saleor project:
+
+- **Original Project**: Cloned from [Saleor Official Repository](https://github.com/saleor/saleor)
+- **Custom Images**: Built and pushed to [Docker Hub](https://hub.docker.com/u/matthewntsiful)
+  - `matthewntsiful/saleor-webapp:latest` - Main Saleor API application
+  - `matthewntsiful/saleor-dashboard:latest` - Admin dashboard interface
+
+### Image Build Process
+```bash
+# Images were built from the original Saleor source
+git clone https://github.com/saleor/saleor.git
+cd saleor
+
+# Built and pushed custom images
+docker build -t matthewntsiful/saleor-webapp:latest .
+docker push matthewntsiful/saleor-webapp:latest
+
+docker build -t matthewntsiful/saleor-dashboard:latest -f Dockerfile.dashboard .
+docker push matthewntsiful/saleor-dashboard:latest
+```
 
 ## 🏗️ Architecture Overview
 
