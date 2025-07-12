@@ -164,10 +164,11 @@ Automated GitHub Actions workflow for building and deploying Saleor:
 - **Manual Trigger**: Supports workflow_dispatch for manual deployments
 
 ### Required Secrets
-Configure these secrets in your GitHub repository:
+No external secrets needed for testing - uses KinD cluster in CI.
 
+For production deployment to external cluster:
 ```bash
-KUBE_CONFIG        # Base64 encoded kubeconfig file
+KUBE_CONFIG        # Base64 encoded kubeconfig file (optional)
 ```
 
 ### Required Variables

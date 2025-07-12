@@ -86,10 +86,14 @@ jobs:
       with:
         version: 'latest'
         
-    - name: Set up Kubernetes config
+    - name: Create KinD cluster
+      uses: helm/kind-action@v1
+      with:
+        cluster_name: saleor-test
+        
+    - name: Load images to KinD
       run: |
-        mkdir -p ~/.kube
-        echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > ~/.kube/config
+        kind load docker-image ${{ env.SALEOR_IMAGE }}:${{ github.sha }} --name saleor-test
         
     - name: Update image tags in manifests
       run: |
