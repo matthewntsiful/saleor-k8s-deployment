@@ -110,3 +110,36 @@ jobs:
         kubectl get pods -n ${{ env.KUBERNETES_NAMESPACE }}
         kubectl get services -n ${{ env.KUBERNETES_NAMESPACE }}
         kubectl get ingress -n ${{ env.KUBERNETES_NAMESPACE }}
+        
+    - name: Wait for pods to be ready
+      run: |
+        kubectl wait --for=condition=ready pod -l app=saleor -n ${{ env.KUBERNETES_NAMESPACE }} --timeout=300s
+        kubectl wait --for=condition=ready pod -l app=postgres -n ${{ env.KUBERNETES_NAMESPACE }} --timeout=120s
+        kubectl wait --for=condition=ready pod -l app=redis -n ${{ env.KUBERNETES_NAMESPACE }} --timeout=60s
+        
+    - name: Test Saleor API health
+      run: |
+        kubectl port-forward -n ${{ env.KUBERNETES_NAMESPACE }} svc/saleor 8000:8000 &
+        sleep 10
+        curl -f http://localhost:8000/health/ || exit 1
+        echo "✅ Saleor API health check passed"
+        
+    - name: Test GraphQL endpoint
+      run: |
+        response=$(curl -s -X POST http://localhost:8000/graphql/ \
+          -H "Content-Type: application/json" \
+          -d '{"query": "{ shop { name } }"}')
+        echo "GraphQL Response: $response"
+        if echo "$response" | grep -q "data"; then
+          echo "✅ GraphQL endpoint working"
+        else
+          echo "❌ GraphQL endpoint failed"
+          exit 1
+        fi
+        
+    - name: Test Dashboard accessibility
+      run: |
+        kubectl port-forward -n ${{ env.KUBERNETES_NAMESPACE }} svc/saleor-dashboard 3000:3000 &
+        sleep 10
+        curl -f http://localhost:3000/ || exit 1
+        echo "✅ Dashboard accessible"

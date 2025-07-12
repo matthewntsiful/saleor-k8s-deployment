@@ -160,6 +160,10 @@ Automated GitHub Actions workflow for building and deploying Saleor:
 - **Security Scan**: Trivy vulnerability scanning with SARIF upload
 - **Push**: Pushes images to GitHub Container Registry (GHCR)
 - **Deploy**: Automatic deployment to Kubernetes on main branch
+- **Test**: Comprehensive application testing in KinD cluster
+  - Health endpoint verification
+  - GraphQL API functionality test
+  - Dashboard accessibility check
 - **Verification**: Health checks and rollout status validation
 - **Manual Trigger**: Supports workflow_dispatch for manual deployments
 
