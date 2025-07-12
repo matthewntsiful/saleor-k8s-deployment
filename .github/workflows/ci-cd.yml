@@ -121,9 +121,14 @@ jobs:
         kubectl wait --for=condition=ready pod -l app=postgres -n ${{ env.KUBERNETES_NAMESPACE }} --timeout=120s
         kubectl wait --for=condition=ready pod -l app=redis -n ${{ env.KUBERNETES_NAMESPACE }} --timeout=60s
         
+    - name: Validate services exist
+      run: |
+        kubectl get svc saleor-service -n ${{ env.KUBERNETES_NAMESPACE }}
+        kubectl get svc saleor-dashboard-service -n ${{ env.KUBERNETES_NAMESPACE }}
+        
     - name: Test Saleor API health
       run: |
-        kubectl port-forward -n ${{ env.KUBERNETES_NAMESPACE }} svc/saleor 8000:8000 &
+        kubectl port-forward -n ${{ env.KUBERNETES_NAMESPACE }} svc/saleor-service 8000:80 &
         sleep 10
         curl -f http://localhost:8000/health/ || exit 1
         echo "✅ Saleor API health check passed"
@@ -143,7 +148,7 @@ jobs:
         
     - name: Test Dashboard accessibility
       run: |
-        kubectl port-forward -n ${{ env.KUBERNETES_NAMESPACE }} svc/saleor-dashboard 3000:3000 &
+        kubectl port-forward -n ${{ env.KUBERNETES_NAMESPACE }} svc/saleor-dashboard-service 3000:80 &
         sleep 10
         curl -f http://localhost:3000/ || exit 1
         echo "✅ Dashboard accessible"
