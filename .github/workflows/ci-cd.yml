@@ -10,7 +10,7 @@ on:
 permissions:
     contents: read
     packages: write
-    security-events: write
+    security-events: write #
 env:
   REGISTRY: ghcr.io
   SALEOR_IMAGE: ghcr.io/${{ github.repository_owner }}/saleor-webapp
