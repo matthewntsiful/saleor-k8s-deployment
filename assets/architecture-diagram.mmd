@@ -1,0 +1,56 @@
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#1a1a2e', 'primaryTextColor': '#e6e6e6', 'primaryBorderColor': '#16213e', 'lineColor': '#0f3460', 'secondaryColor': '#16213e', 'tertiaryColor': '#16213e'}}}%%
+
+graph TD
+    subgraph "Kubernetes Cluster"
+        subgraph "Ingress Controller"
+            Nginx[NGINX Ingress]
+        end
+        
+        subgraph "Application Layer"
+            API[Saleor API\n<small>GraphQL Backend</small>]
+            Dashboard[Saleor Dashboard\n<small>Admin Interface</small>]
+        end
+        
+        subgraph "Data Layer"
+            PostgreSQL[(PostgreSQL\n<small>Primary Database</small>)]
+            Redis[(Redis\n<small>Cache & Task Queue</small>)]
+        end
+        
+        subgraph "Monitoring"
+            Prometheus[Prometheus\n<small>Metrics</small>]
+            Grafana[Grafana\n<small>Visualization</small>]
+        end
+    end
+    
+    subgraph "External Services"
+        CDN[CDN\n<small>Static Assets</small>]
+        Email[Email Service\n<small>e.g., SendGrid</small>]
+        Storage[Object Storage\n<small>e.g., AWS S3</small>]
+    end
+    
+    %% Connections
+    Nginx -->|HTTPS| API
+    Nginx -->|HTTPS| Dashboard
+    
+    API -->|Read/Write| PostgreSQL
+    API -->|Cache & Tasks| Redis
+    
+    %% External Services
+    API -.->|Store Files| Storage
+    API -.->|Send Emails| Email
+    API -.->|Serve Media| CDN
+    
+    %% Monitoring
+    Prometheus -->|Scrape Metrics| API
+    Prometheus -->|Scrape Metrics| PostgreSQL
+    Prometheus -->|Scrape Metrics| Redis
+    Grafana -->|Query| Prometheus
+    
+    %% Styling
+    classDef k8s fill:#2a4d8f,stroke:#1a365d,color:white,stroke-width:2px
+    classDef external fill:#4a6da7,stroke:#2a4d8f,color:white,stroke-width:2px
+    classDef storage fill:#4f8a8b,stroke:#2c3e50,color:white,stroke-width:2px
+    
+    class Nginx,API,Dashboard,Prometheus,Grafana k8s
+    class PostgreSQL,Redis storage
+    class CDN,Email,Storage external

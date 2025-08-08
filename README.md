@@ -33,25 +33,32 @@ docker push matthewntsiful/saleor-dashboard:latest
 
 ## 🏗️ Architecture Overview
 
-This project deploys a complete e-commerce platform consisting of:
+This project deploys a complete e-commerce platform with the following components:
+
+### System Architecture
+
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#1a1a2e', 'primaryTextColor': '#e6e6e6', 'primaryBorderColor': '#16213e', 'lineColor': '#0f3460', 'secondaryColor': '#16213e', 'tertiaryColor': '#16213e'}}}%%
+
+[Reference: assets/architecture-diagram.mmd]
+```
+
+### CI/CD Pipeline
+
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#1a1a2e', 'primaryTextColor': '#e6e6e6', 'primaryBorderColor': '#16213e', 'lineColor': '#0f3460', 'secondaryColor': '#16213e', 'tertiaryColor': '#16213e'}}}%%
+
+[Reference: assets/cicd-pipeline.mmd]
+```
+
+### Key Components
 
 - **Saleor API** - Django-based GraphQL e-commerce backend
 - **Saleor Dashboard** - React-based admin interface
 - **PostgreSQL** - Primary database with persistent storage
 - **Redis** - Caching and Celery task queue
 - **Nginx Ingress** - Load balancing and external access
-
-```
-┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│   Nginx Ingress │────│   Saleor API     │────│   PostgreSQL    │
-│   (External)    │    │   (GraphQL)      │    │   (Persistent)  │
-└─────────────────┘    └──────────────────┘    └─────────────────┘
-         │                       │                       │
-         │              ┌──────────────────┐    ┌─────────────────┐
-         └──────────────│ Saleor Dashboard │    │     Redis       │
-                        │   (Admin UI)     │    │  (Cache/Queue)  │
-                        └──────────────────┘    └─────────────────┘
-```
+- **Monitoring** - Prometheus and Grafana for metrics and visualization
 
 ## 🚀 Features
 
