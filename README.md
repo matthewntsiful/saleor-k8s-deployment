@@ -37,18 +37,70 @@ This project deploys a complete e-commerce platform with the following component
 
 ### System Architecture
 
-```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#1a1a2e', 'primaryTextColor': '#e6e6e6', 'primaryBorderColor': '#16213e', 'lineColor': '#0f3460', 'secondaryColor': '#16213e', 'tertiaryColor': '#16213e'}}}%%
+![Architecture Diagram](assets/architecture-diagram.png)
+*High-level architecture of the Saleor e-commerce platform on Kubernetes*
 
-[Reference: assets/architecture-diagram.mmd]
-```
+*The above diagram is also available in [Mermaid format](assets/architecture-diagram.mmd) for editing.*
 
 ### CI/CD Pipeline
 
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#1a1a2e', 'primaryTextColor': '#e6e6e6', 'primaryBorderColor': '#16213e', 'lineColor': '#0f3460', 'secondaryColor': '#16213e', 'tertiaryColor': '#16213e'}}}%%
-
-[Reference: assets/cicd-pipeline.mmd]
+graph LR
+    subgraph "Version Control"
+        GitHub["GitHub Repository\n<small>Source Code</small>"]
+    end
+    
+    subgraph "CI/CD Pipeline"
+        Build[Build & Test\n<small>Docker Images</small>]
+        Test[Run Tests\n<small>Unit & Integration</small>]
+        Scan[Security Scan\n<small>Vulnerability Check</small>]
+        DeployDev[Deploy to Dev\n<small>Kubernetes</small>]
+        TestE2E[E2E Tests\n<small>Smoke & Regression</small>]
+        DeployProd[Deploy to Production\n<small>Kubernetes</small>]
+        Monitor[Monitor\n<small>Application Health</small>]
+    end
+    
+    subgraph "Container Registry"
+        DockerHub["Docker Hub\n<small>matthewntsiful/*</small>"]
+    end
+    
+    subgraph "Environments"
+        K8sDev["Development\n<small>Kubernetes Cluster</small>"]
+        K8sProd["Production\n<small>Kubernetes Cluster</small>"]
+    end
+    
+    subgraph "Monitoring"
+        Logs["Logs\n<small>ELK Stack</small>"]
+        Metrics["Metrics\n<small>Prometheus</small>"]
+        Alerts["Alerts\n<small>AlertManager</small>"]
+    end
+    
+    %% Pipeline Flow
+    GitHub -->|On Push/PR| Build
+    Build -->|On Success| Test
+    Test -->|On Success| Scan
+    Scan -->|On Success| DockerHub
+    DockerHub -->|Image Ready| DeployDev
+    DeployDev -->|Deployed| TestE2E
+    TestE2E -->|Tests Pass| DeployProd
+    DeployProd -->|Deployed| Monitor
+    
+    %% Monitoring Connections
+    K8sDev -->|Logs & Metrics| Logs
+    K8sDev -->|Metrics| Metrics
+    K8sProd -->|Logs & Metrics| Logs
+    K8sProd -->|Metrics| Metrics
+    Metrics -->|Alerts| Alerts
+    
+    %% Styling
+    classDef pipeline fill:#2a4d8f,stroke:#1a365d,color:white,stroke-width:2px
+    classDef infra fill:#4f8a8b,stroke:#2c3e50,color:white,stroke-width:2px
+    classDef monitoring fill:#4a6da7,stroke:#2a4d8f,color:white,stroke-width:2px
+    
+    class Build,Test,Scan,DeployDev,TestE2E,DeployProd,Monitor pipeline
+    class GitHub,DockerHub,K8sDev,K8sProd infra
+    class Logs,Metrics,Alerts monitoring
 ```
 
 ### Key Components
